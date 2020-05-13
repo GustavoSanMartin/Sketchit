@@ -21,8 +21,8 @@ class ViewingActivity : AppCompatActivity() {
 
         val firestore = Firebase.firestore
 
-        firestore.collection("rounds")
-            .document("etqjkzJY0MV16aLYau7b") // TODO: search for rounds
+        firestore.collection(BuildConfig.COLLECTION_NAME)
+            .document(BuildConfig.TEST_DOCUMENT) // TODO: search for rounds
             .addSnapshotListener { snapshot, exception ->
                 if (snapshot != null) {
                     onReceiveSnapshot(snapshot)

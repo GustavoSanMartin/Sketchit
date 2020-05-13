@@ -18,9 +18,11 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "TEST_DOCUMENT", TEST_DOCUMENT_VALUE
+            buildConfigField "String", "COLLECTION_NAME", COLLECTION_NAME_VALUE
         }
     }
 }

@@ -29,9 +29,9 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_reset).setOnClickListener {
             Firebase.firestore
-                .collection("rounds")
-                .document("etqjkzJY0MV16aLYau7b")
-                .update("points", null)
+                .collection(BuildConfig.COLLECTION_NAME)
+                .document(BuildConfig.TEST_DOCUMENT)
+                .set(emptyMap<String, String>())
         }
     }
 }

@@ -16,8 +16,8 @@ class DrawingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_drawing)
 
         val drawingDocument = Firebase.firestore
-            .collection("rounds")
-            .document("etqjkzJY0MV16aLYau7b")
+            .collection(BuildConfig.COLLECTION_NAME)
+            .document(BuildConfig.TEST_DOCUMENT)
 
         findViewById<DrawingView>(R.id.drawing_view).setOnDrawListener(object : DrawingListener {
             override fun onStartDraw(x: Float, y: Float) {
