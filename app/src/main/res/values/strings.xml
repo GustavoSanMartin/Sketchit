@@ -3,4 +3,9 @@
     <string name="draw">Draw</string>
     <string name="watch">Watch</string>
     <string name="reset">Reset</string>
+    <string name="drawing_prompt_template">Draw a %s</string>
+    <string name="enter_guess">Enter your guess here</string>
+    <string name="guess">Guess!</string>
+    <string name="success_msg">That\'s correct!</string>
+    <string name="incorrect_msg">That is not correct :(</string>
 </resources>

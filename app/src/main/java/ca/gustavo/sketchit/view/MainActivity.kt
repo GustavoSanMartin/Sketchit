@@ -1,19 +1,21 @@
-package ca.gustavo.sketchit
+package ca.gustavo.sketchit.view
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
-import ca.gustavo.sketchit.view.DrawingListener
-import ca.gustavo.sketchit.view.DrawingView
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.app
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import ca.gustavo.sketchit.MyApplication
+import ca.gustavo.sketchit.R
+import ca.gustavo.sketchit.di.injector
+import ca.gustavo.sketchit.domain.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel by viewModels<MainViewModel> { injector.mainViewModelFactory() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        (applicationContext as MyApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -28,10 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_reset).setOnClickListener {
-            Firebase.firestore
-                .collection(BuildConfig.COLLECTION_NAME)
-                .document(BuildConfig.TEST_DOCUMENT)
-                .set(emptyMap<String, String>())
+            viewModel.resetDrawing()
         }
     }
 }
