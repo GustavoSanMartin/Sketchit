@@ -7,4 +7,4 @@ A firebase project is required with a `google-services.json` file placed in the 
 ## Screenshots
 Drawer | Guesser(s)
 --- | ---
-![Drawer](readme_src/drawer) | ![Guesser](readme_src/viewer)
+![Drawer](https://github.com/GustavoSanMartin/Sketchit/blob/master/readme_src/drawer.png) | ![Guesser](https://github.com/GustavoSanMartin/Sketchit/blob/master/readme_src/viewer.png)
