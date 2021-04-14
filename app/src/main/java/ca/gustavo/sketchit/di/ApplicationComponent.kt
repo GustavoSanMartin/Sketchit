@@ -5,7 +5,9 @@ import ca.gustavo.sketchit.view.DrawingActivity
 import ca.gustavo.sketchit.view.MainActivity
 import ca.gustavo.sketchit.view.ViewingActivity
 import dagger.Component
+import javax.inject.Singleton
 
+@Singleton
 @Component(modules = [NetworkModule::class])
 interface ApplicationComponent {
     fun inject(activity: MainActivity)

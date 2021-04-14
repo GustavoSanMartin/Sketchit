@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ca.gustavo.sketchit.model.Coordinate
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -11,14 +12,14 @@ import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
     private val getDrawingPoints: GetDrawingPointsUseCase,
-    private val resetDrawingPoints: ResetDrawingPointsUseCase,
+    private val connectToWebsocket: ConnectToWebsocketUseCase,
     private val updateDrawingPoints: UpdateDrawingUseCase,
     private val randomWordGenerator: RandomWordGeneratorUseCase,
     private val verifyGuess: VerifyGuessUseCase
 ) : ViewModel() {
 
-    private val _drawingPoints: MutableLiveData<List<Pair<Float, Float>>> = MutableLiveData()
-    val drawingPoints: LiveData<List<Pair<Float, Float>>> = _drawingPoints
+    private val _drawingPoints: MutableLiveData<Coordinate> = MutableLiveData()
+    val drawingPoints: LiveData<Coordinate> = _drawingPoints
 
     private val _randomWord: MutableLiveData<String> = MutableLiveData()
     val randomWord: LiveData<String> = _randomWord
@@ -32,8 +33,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun connect() = viewModelScope.launch {
+        connectToWebsocket()
+    }
+
     fun resetDrawing() = viewModelScope.launch {
-        resetDrawingPoints()
+        connectToWebsocket()
+        startListeningToDrawingPoints()
     }
 
     fun updateDrawing(x: Float, y: Float) {

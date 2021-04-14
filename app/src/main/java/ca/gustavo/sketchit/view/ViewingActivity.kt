@@ -11,12 +11,14 @@ import ca.gustavo.sketchit.MyApplication
 import ca.gustavo.sketchit.R
 import ca.gustavo.sketchit.di.injector
 import ca.gustavo.sketchit.domain.MainViewModel
+import ca.gustavo.sketchit.model.Coordinate
 
 class ViewingActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel> { injector.mainViewModelFactory() }
 
     private lateinit var drawingView: DrawingView
+    private var isDrawing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         (applicationContext as MyApplication).appComponent.inject(this)
@@ -26,7 +28,8 @@ class ViewingActivity : AppCompatActivity() {
         drawingView = findViewById(R.id.viewing_view)
 
         viewModel.startListeningToDrawingPoints()
-        viewModel.drawingPoints.observe(this, Observer {
+        viewModel.drawingPoints.observe(this, {
+            println("goose: viewing: $it")
             onReceiveSnapshot(it)
         })
 
@@ -41,23 +44,21 @@ class ViewingActivity : AppCompatActivity() {
         }
     }
 
-    private fun onReceiveSnapshot(points: List<Pair<Float, Float>>) {
-        var isDrawing = false
-        points.forEach { point ->
-            if (point.first == -1F && point.second == -1F) {
-                isDrawing = false
-                runOnUiThread {
-                    drawingView.endDraw()
-                }
-            } else if (!isDrawing) {
-                isDrawing = true
-                runOnUiThread {
-                    drawingView.startDraw(point.first, point.second)
-                }
-            } else {
-                runOnUiThread {
-                    drawingView.draw(point.first, point.second)
-                }
+    private fun onReceiveSnapshot(point: Coordinate) {
+        println(point)
+        if (point.x == -1F && point.y == -1F) {
+            isDrawing = false
+            runOnUiThread {
+                drawingView.endDraw()
+            }
+        } else if (!isDrawing) {
+            isDrawing = true
+            runOnUiThread {
+                drawingView.startDraw(point.x, point.y)
+            }
+        } else {
+            runOnUiThread {
+                drawingView.draw(point.x, point.y)
             }
         }
     }

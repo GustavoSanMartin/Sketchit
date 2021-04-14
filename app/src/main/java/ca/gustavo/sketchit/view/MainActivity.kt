@@ -9,6 +9,7 @@ import ca.gustavo.sketchit.MyApplication
 import ca.gustavo.sketchit.R
 import ca.gustavo.sketchit.di.injector
 import ca.gustavo.sketchit.domain.MainViewModel
+import io.ktor.client.statement.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,6 +19,8 @@ class MainActivity : AppCompatActivity() {
         (applicationContext as MyApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        viewModel.connect()
 
         findViewById<Button>(R.id.btn_draw).setOnClickListener {
             val intent = Intent(this, DrawingActivity::class.java)
