@@ -18,7 +18,6 @@ import javax.inject.Singleton
 
 private const val COORDINATE_TYPE = "c"
 private const val NAME_TYPE = "n"
-private const val GUESS_TYPE = "g"
 
 @Singleton
 class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient) {
@@ -56,15 +55,13 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
             method = HttpMethod.Get,
             host = "10.0.2.2",
             port = 8080,
-            path = "/chat"
+            path = "/draw"
         ) {
             val messageOutputRoutine = launch { outputMessages() }
             val userInputRoutine = launch { inputMessages() }
 
-            println("goose: joining")
             userInputRoutine.join() // Wait for completion; either "exit" or error
             messageOutputRoutine.cancelAndJoin()
-            println("goose: done")
         }
     }
 
@@ -74,7 +71,6 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
             message as? Frame.Text ?: continue
             try {
                 val serverMsg = Json.decodeFromString<ServerMsg>(message.readText())
-                println("goose: received: $serverMsg")
                 when (serverMsg.type) {
                     COORDINATE_TYPE -> {
                         val coordinateList = serverMsg.payload
@@ -85,16 +81,13 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
                         incomingCoordinatesChannel.offer(coordinate)
                     }
                     NAME_TYPE -> {
-                        val nameList = serverMsg.payload
-                            .split(",")
-
-                        println("received: $nameList")
+                        val nameList = serverMsg.payload.split(",")
                         incomingNamesChannel.offer(nameList)
                     }
                 }
 
             } catch (e: Exception) {
-                println("goose: ${message.readText()} was not a server message")
+                println("${message.readText()} was not a server message")
             }
         }
     }
@@ -102,11 +95,9 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
     private suspend fun DefaultClientWebSocketSession.inputMessages() {
         outgoingFlow.collect {
             try {
-                val serverMsg = Json.encodeToString(it)
-                println("goose: sent: $serverMsg")
-                send(serverMsg)
+                send(Json.encodeToString(it))
             } catch (e: SerializationException) {
-                println("goose: $it was not a coordinate. Discarding")
+                println("$it was not a server message. Discarding")
             }
         }
     }

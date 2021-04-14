@@ -24,7 +24,7 @@ fun Application.module() {
     install(WebSockets)
     routing {
         val connections = Collections.synchronizedSet<Connection>(LinkedHashSet())
-        webSocket("/chat") {
+        webSocket("/draw") {
             suspend fun updateNames() {
                 for (connection in connections) {
                     val response = connections.mapNotNull { it.name }.joinToString()

@@ -20,9 +20,6 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-
-        println("init")
-
         viewModelScope.launch {
             connectToWebsocket()
         }
@@ -32,10 +29,7 @@ class MainViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            getNames().collect {
-                println("view model names: $it")
-                _names.postValue(it)
-            }
+            getNames().collect { _names.postValue(it) }
         }
     }
 
@@ -48,26 +42,9 @@ class MainViewModel @Inject constructor(
     private val _isGuessSuccessful: MutableLiveData<Boolean?> = MutableLiveData()
     val isGuessSuccessful: LiveData<Boolean?> = _isGuessSuccessful
 
-    fun startListeningToDrawingPoints() = viewModelScope.launch {
-        getDrawingPoints().collect {
-            _drawingPoints.postValue(it)
-        }
-    }
-
-    fun startListening() = viewModelScope.launch {
-
-        getNames().collect {
-            _names.postValue(it)
-        }
-    }
-
     fun sendName(name: String) = viewModelScope.launch {
         sendMyName(name)
     }
-
-//    fun connect() = viewModelScope.launch {
-//        connectToWebsocket()
-//    }
 
     fun updateDrawing(x: Float, y: Float) {
         updateDrawingPoints(x, y)
