@@ -1,11 +1,16 @@
 <resources>
     <string name="app_name">Sketchit</string>
-    <string name="draw">Draw</string>
-    <string name="watch">Watch</string>
+    <string name="create_btn">Create Room</string>
+    <string name="join_btn">Join Room</string>
     <string name="reset">Reset</string>
     <string name="drawing_prompt_template">Draw a %s</string>
     <string name="enter_guess">Enter your guess here</string>
     <string name="guess">Guess!</string>
     <string name="success_msg">That\'s correct!</string>
     <string name="incorrect_msg">That is not correct :(</string>
+    <string name="name">Name:</string>
+    <string name="start_game">Start Painting!</string>
+    <string name="room_code">Room Code:</string>
+    <string name="profile_image">profile image</string>
+    <string name="painters_connected">Painters connected:</string>
 </resources>

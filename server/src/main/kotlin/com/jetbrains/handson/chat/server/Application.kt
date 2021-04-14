@@ -16,14 +16,27 @@ import kotlin.collections.LinkedHashSet
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
+private const val COORDINATE_TYPE = "c"
+private const val NAME_TYPE = "n"
+
 @Suppress("unused")
 fun Application.module() {
     install(WebSockets)
     routing {
-        val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
+        val connections = Collections.synchronizedSet<Connection>(LinkedHashSet())
         webSocket("/chat") {
-            println("adding user")
+            suspend fun updateNames() {
+                for (connection in connections) {
+                    val response = connections.mapNotNull { it.name }.joinToString()
+
+                    val msg = ServerMsg(NAME_TYPE, response)
+                    println("sending to ${connection.id}: $msg")
+                    connection.session.send(Json.encodeToString(msg))
+                }
+            }
+
             val thisConnection = Connection(this)
+            println("adding user ${thisConnection.id}")
             connections += thisConnection
 
             try {
@@ -31,36 +44,45 @@ fun Application.module() {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
                     try {
-                        val coordinate = Json.decodeFromString<Coordinates>(receivedText)
-                        println(coordinate)
+                        val serverMsg = Json.decodeFromString<ServerMsg>(receivedText)
 
-                        connections.forEach {
-                            if (it != thisConnection) {
-                                it.session.send(Json.encodeToString(coordinate))
+                        when (serverMsg.type) {
+                            COORDINATE_TYPE -> {
+                                println("received coordinates from ${thisConnection.id}: $serverMsg")
+                                for (connection in connections) {
+                                    if (connection.id == thisConnection.id) continue
+                                    connection.session.send(Json.encodeToString(serverMsg))
+                                }
+                            }
+                            NAME_TYPE -> {
+                                thisConnection.name = serverMsg.payload
+                                println("received name from ${thisConnection.id}: $serverMsg")
+                                updateNames()
                             }
                         }
                     } catch (e: SerializationException) {
-                        println("$receivedText was not a coordinate. Discarding")
+                        println("$receivedText was not a server message. Discarding")
                     }
 
                 }
             } catch (e: Exception) {
                 println(e.localizedMessage)
             } finally {
-                println("Removing $thisConnection!")
+                println("removing user ${thisConnection.id}!")
                 connections -= thisConnection
+                updateNames()
             }
         }
     }
 }
 
-data class Connection(val session: DefaultWebSocketSession) {
-    private val lastId = AtomicInteger(0)
-    val name = "user${lastId.getAndIncrement()}"
+data class Connection(val session: DefaultWebSocketSession, var name: String? = null) {
+    val id = lastId.getAndIncrement()
+
+    companion object {
+        var lastId = AtomicInteger(0)
+    }
 }
 
 @Serializable
-data class Status(val status: String)
-
-@Serializable
-data class Coordinates(val x: Float, val y: Float)
+data class ServerMsg(val type: String, val payload: String)

@@ -8,21 +8,42 @@ import ca.gustavo.sketchit.model.Coordinate
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class MainViewModel @Inject constructor(
-    private val getDrawingPoints: GetDrawingPointsUseCase,
     private val connectToWebsocket: ConnectToWebsocketUseCase,
+    private val getDrawingPoints: GetDrawingPointsUseCase,
     private val updateDrawingPoints: UpdateDrawingUseCase,
-    private val randomWordGenerator: RandomWordGeneratorUseCase,
-    private val verifyGuess: VerifyGuessUseCase
+    private val sendMyName: SendNameUseCase,
+    private val getNames: GetNamesUseCase
 ) : ViewModel() {
+
+    init {
+
+        println("init")
+
+        viewModelScope.launch {
+            connectToWebsocket()
+        }
+
+        viewModelScope.launch {
+            getDrawingPoints().collect { _drawingPoints.postValue(it) }
+        }
+
+        viewModelScope.launch {
+            getNames().collect {
+                println("view model names: $it")
+                _names.postValue(it)
+            }
+        }
+    }
 
     private val _drawingPoints: MutableLiveData<Coordinate> = MutableLiveData()
     val drawingPoints: LiveData<Coordinate> = _drawingPoints
 
-    private val _randomWord: MutableLiveData<String> = MutableLiveData()
-    val randomWord: LiveData<String> = _randomWord
+    private val _names: MutableLiveData<List<String>> = MutableLiveData()
+    val names: LiveData<List<String>> = _names
 
     private val _isGuessSuccessful: MutableLiveData<Boolean?> = MutableLiveData()
     val isGuessSuccessful: LiveData<Boolean?> = _isGuessSuccessful
@@ -33,25 +54,22 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun connect() = viewModelScope.launch {
-        connectToWebsocket()
+    fun startListening() = viewModelScope.launch {
+
+        getNames().collect {
+            _names.postValue(it)
+        }
     }
 
-    fun resetDrawing() = viewModelScope.launch {
-        connectToWebsocket()
-        startListeningToDrawingPoints()
+    fun sendName(name: String) = viewModelScope.launch {
+        sendMyName(name)
     }
+
+//    fun connect() = viewModelScope.launch {
+//        connectToWebsocket()
+//    }
 
     fun updateDrawing(x: Float, y: Float) {
         updateDrawingPoints(x, y)
-    }
-
-    fun getRandomWord() = viewModelScope.launch {
-        val word = randomWordGenerator()
-        _randomWord.postValue(word)
-    }
-
-    fun checkGuess(guess: String) = viewModelScope.launch {
-        _isGuessSuccessful.postValue(verifyGuess(guess))
     }
 }

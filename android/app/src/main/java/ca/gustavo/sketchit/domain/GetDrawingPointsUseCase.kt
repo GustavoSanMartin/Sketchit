@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetDrawingPointsUseCase @Inject constructor(private val websocketRepository: WebsocketRepository) {
-    operator fun invoke(): Flow<Coordinate> = websocketRepository.incomingFlow
+    operator fun invoke(): Flow<Coordinate> = websocketRepository.incomingCoordinatesFlow
 }

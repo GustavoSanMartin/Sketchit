@@ -9,9 +9,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.*
 import android.view.View
+import ca.gustavo.sketchit.R
 
 private const val STROKE_WIDTH = 20F
-private const val PAINT_COLOR = 0xFF660000.toInt()
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -29,7 +29,7 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
 
     private val paint = Paint().apply {
         isAntiAlias = true
-        color = PAINT_COLOR
+        color = resources.getColor(R.color.colorAccent, null)
         strokeWidth = STROKE_WIDTH
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
