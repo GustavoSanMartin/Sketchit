@@ -5,7 +5,6 @@ import io.ktor.client.features.websocket.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -22,31 +21,31 @@ private const val NAME_TYPE = "n"
 @Singleton
 class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient) {
 
-    private val incomingCoordinatesChannel = ConflatedBroadcastChannel<Coordinate>()
-    val incomingCoordinatesFlow = incomingCoordinatesChannel.asFlow()
+    private val _incomingCoordinatesFlow = MutableStateFlow<Coordinate?>(null)
+    val incomingCoordinatesFlow: Flow<Coordinate> = _incomingCoordinatesFlow.filterNotNull()
 
-    private val incomingNamesChannel = ConflatedBroadcastChannel<List<String>>()
-    val incomingNamesFlow = incomingNamesChannel.asFlow()
+    private val _incomingNamesFlow = MutableStateFlow<List<String>?>(null)
+    val incomingNamesFlow: Flow<List<String>> = _incomingNamesFlow.filterNotNull()
 
-    private val outgoingCoordinatesChannel = ConflatedBroadcastChannel<Coordinate>()
-    private val outgoingCoordinatesFlow = outgoingCoordinatesChannel.asFlow().map {
+    private val _outgoingCoordinatesFlow = MutableStateFlow<Coordinate?>(null)
+    private val outgoingCoordinatesFlow = _outgoingCoordinatesFlow.filterNotNull().map {
         val coordinate = "${it.x},${it.y}"
         ServerMsg(COORDINATE_TYPE, coordinate)
     }
 
-    private val outgoingNamesChannel = ConflatedBroadcastChannel<String>()
-    private val outgoingNamesFlow = outgoingNamesChannel.asFlow().map {
+    private val _outgoingNamesFlow = MutableStateFlow<String?>(null)
+    private val outgoingNamesFlow = _outgoingNamesFlow.filterNotNull().map {
         ServerMsg(NAME_TYPE, it)
     }
 
     private val outgoingFlow: Flow<ServerMsg> = merge(outgoingNamesFlow, outgoingCoordinatesFlow)
 
     fun sendCoordinate(coordinate: Coordinate) {
-        outgoingCoordinatesChannel.offer(coordinate)
+        _outgoingCoordinatesFlow.value = coordinate
     }
 
     fun sendName(name: String) {
-        outgoingNamesChannel.offer(name)
+        _outgoingNamesFlow.value = name
     }
 
     suspend fun startWebsocket() {
@@ -78,11 +77,13 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
                             .map { it.toFloat() }
 
                         val coordinate = Coordinate(coordinateList[0], coordinateList[1])
-                        incomingCoordinatesChannel.offer(coordinate)
+                        print("goose: incoming coordinate $coordinate")
+                        _incomingCoordinatesFlow.value = coordinate
                     }
                     NAME_TYPE -> {
                         val nameList = serverMsg.payload.split(",")
-                        incomingNamesChannel.offer(nameList)
+                        print("goose: incoming name $nameList")
+                        _incomingNamesFlow.value = nameList
                     }
                 }
 
@@ -94,6 +95,7 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
 
     private suspend fun DefaultClientWebSocketSession.inputMessages() {
         outgoingFlow.collect {
+            print("goose: outgoing $it")
             try {
                 send(Json.encodeToString(it))
             } catch (e: SerializationException) {
@@ -107,4 +109,4 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
 data class ServerMsg(val type: String, val payload: String)
 
 @Serializable
-data class Coordinate(val x: Float, val y: Float)
+data class Coordinate(val x: Float = -1F, val y: Float = -1F)

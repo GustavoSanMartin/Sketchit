@@ -43,27 +43,27 @@ fun Application.module() {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
-                    try {
-                        val serverMsg = Json.decodeFromString<ServerMsg>(receivedText)
-
-                        when (serverMsg.type) {
-                            COORDINATE_TYPE -> {
-                                println("received coordinates from ${thisConnection.id}: $serverMsg")
-                                for (connection in connections) {
-                                    if (connection.id == thisConnection.id) continue
-                                    connection.session.send(Json.encodeToString(serverMsg))
-                                }
-                            }
-                            NAME_TYPE -> {
-                                thisConnection.name = serverMsg.payload
-                                println("received name from ${thisConnection.id}: $serverMsg")
-                                updateNames()
-                            }
-                        }
+                    val serverMsg: ServerMsg = try {
+                         Json.decodeFromString(receivedText)
                     } catch (e: SerializationException) {
                         println("$receivedText was not a server message. Discarding")
+                        continue
                     }
 
+                    when (serverMsg.type) {
+                        COORDINATE_TYPE -> {
+                            println("received coordinates from ${thisConnection.id}: $serverMsg")
+                            for (connection in connections) {
+                                if (connection.id == thisConnection.id) continue
+                                connection.session.send(Json.encodeToString(serverMsg))
+                            }
+                        }
+                        NAME_TYPE -> {
+                            thisConnection.name = serverMsg.payload
+                            println("received name from ${thisConnection.id}: $serverMsg")
+                            updateNames()
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 println(e.localizedMessage)
