@@ -3,7 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.4.32"
 }
 
-group = "com.jetbrains.handson"
+group = "ca.gustavo.sketchit_server"
 version = "1.0-SNAPSHOT"
 
 repositories {

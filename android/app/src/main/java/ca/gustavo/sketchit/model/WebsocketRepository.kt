@@ -12,6 +12,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.net.ConnectException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,18 +51,23 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
 
     suspend fun startWebsocket() {
 
-        ktorClient.webSocket(
-            method = HttpMethod.Get,
-            host = "10.0.2.2",
-            port = 8080,
-            path = "/draw"
-        ) {
-            val messageOutputRoutine = launch { outputMessages() }
-            val userInputRoutine = launch { inputMessages() }
+        try {
+            ktorClient.webSocket(
+                method = HttpMethod.Get,
+                host = "10.0.2.2",
+                port = 8080,
+                path = "/draw"
+            ) {
+                val messageOutputRoutine = launch { outputMessages() }
+                val userInputRoutine = launch { inputMessages() }
 
-            userInputRoutine.join() // Wait for completion; either "exit" or error
-            messageOutputRoutine.cancelAndJoin()
+                userInputRoutine.join() // Wait for completion; either "exit" or error
+                messageOutputRoutine.cancelAndJoin()
+            }
+        } catch (e: ConnectException) {
+            print(e.message)
         }
+
     }
 
     private suspend fun DefaultClientWebSocketSession.outputMessages() {
@@ -109,4 +115,6 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
 data class ServerMsg(val type: String, val payload: String)
 
 @Serializable
-data class Coordinate(val x: Float = -1F, val y: Float = -1F)
+data class Coordinate(val x: Float = -1F, val y: Float = -1F) {
+    fun isNegative() = x < 0 || y < 0
+}
