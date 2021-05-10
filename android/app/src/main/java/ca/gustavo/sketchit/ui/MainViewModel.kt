@@ -1,7 +1,8 @@
-package ca.gustavo.sketchit.domain
+package ca.gustavo.sketchit.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ca.gustavo.sketchit.domain.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton

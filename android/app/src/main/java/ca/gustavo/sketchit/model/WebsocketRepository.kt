@@ -7,7 +7,6 @@ import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -109,12 +108,4 @@ class WebsocketRepository @Inject constructor(private val ktorClient: HttpClient
             }
         }
     }
-}
-
-@Serializable
-data class ServerMsg(val type: String, val payload: String)
-
-@Serializable
-data class Coordinate(val x: Float = -1F, val y: Float = -1F) {
-    fun isNegative() = x < 0 || y < 0
 }

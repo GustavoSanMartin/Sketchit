@@ -1,4 +1,4 @@
-package ca.gustavo.sketchit.view
+package ca.gustavo.sketchit.ui
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -9,10 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import ca.gustavo.sketchit.R
 import ca.gustavo.sketchit.SketchitApp
 import ca.gustavo.sketchit.di.injector
-import ca.gustavo.sketchit.domain.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 

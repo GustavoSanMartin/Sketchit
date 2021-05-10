@@ -1,7 +1,7 @@
 package ca.gustavo.sketchit.di
 
-import ca.gustavo.sketchit.domain.MainViewModel
-import ca.gustavo.sketchit.view.MainActivity
+import ca.gustavo.sketchit.ui.MainViewModel
+import ca.gustavo.sketchit.ui.MainActivity
 import dagger.Component
 import javax.inject.Singleton
 
